@@ -30,7 +30,7 @@ public class MockVideoScreen : MonoBehaviour
     MeshRenderer _mr;
     Material _matInstance;
     AudioSource _audio;
-    Color _restColor = new Color(0.05f, 0.05f, 0.05f, 1f); // dim when off
+    Color _restColor = Color.white; // dim when off
     Coroutine _pulseRoutine;
 
     void Awake()
