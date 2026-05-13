@@ -5,31 +5,65 @@ public class TTTSEnemy : MonoBehaviour
 {
     [SerializeField] Transform player;
     [SerializeField] Transform bat;
-    [SerializeField] float followSpeed = 3f;
+    [SerializeField] float chaseSpeed = 6f;
     [SerializeField] float catchDistance = 1.5f;
     [SerializeField] float batSwingSpeed = 3f;
     [SerializeField] float batSwingAngle = 50f;
+
+    bool _isChasing = false;
 
     void Update()
     {
         if (player == null) return;
 
-        // follow player
-        Vector3 dir = (player.position - transform.position).normalized;
-        transform.position += dir * followSpeed * Time.deltaTime;
+        SwingBat();
+        UpdateChaseState();
+        MoveToTarget();
 
-        // face player
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+        if (_isChasing && Vector3.Distance(transform.position, player.position) < catchDistance)
+            SceneManager.LoadScene("GameOver");
+    }
 
-        // swing bat
-        if (bat != null)
+    void SwingBat()
+    {
+        if (bat == null) return;
+        float angle = Mathf.Sin(Time.time * batSwingSpeed) * batSwingAngle;
+        bat.localRotation = Quaternion.Euler(angle, 0, 0);
+    }
+
+    void UpdateChaseState()
+    {
+        if (RoomManager.Instance == null) return;
+
+        int currentRoom = RoomManager.Instance.currentRoom;
+
+        // player is in a room watching — don't chase
+        if (currentRoom != 0)
         {
-            float angle = Mathf.Sin(Time.time * batSwingSpeed) * batSwingAngle;
-            bat.localRotation = Quaternion.Euler(angle, 0, 0);
+            _isChasing = false;
+            return;
         }
 
-        // catch player
-        if (Vector3.Distance(transform.position, player.position) < catchDistance)
-            SceneManager.LoadScene("GameOver");
+        // player is in hallway — chase if they left a room early
+        _isChasing = RoomManager.Instance.lastEnteredRoom > 0 &&
+                     !RoomManager.Instance.roomCompleted[RoomManager.Instance.lastEnteredRoom];
+    }
+
+    void MoveToTarget()
+    {
+        Transform waypoint = RoomManager.Instance?.currentWaypoint;
+        if (waypoint == null) return;
+
+        // chase player directly if chasing, otherwise walk to waypoint
+        Vector3 target = _isChasing ? player.position : waypoint.position;
+        float speed = _isChasing ? chaseSpeed : 2f;
+
+        float dist = Vector3.Distance(transform.position, target);
+        if (dist > 0.5f)
+        {
+            Vector3 dir = (target - transform.position).normalized;
+            transform.position += dir * speed * Time.deltaTime;
+            transform.LookAt(new Vector3(target.x, transform.position.y, target.z));
+        }
     }
 }

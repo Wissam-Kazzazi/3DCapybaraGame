@@ -1,21 +1,20 @@
 using UnityEngine;
 using UnityEngine.Video;
 
-/// <summary>
-/// Drop on a GameObject with a BoxCollider (trigger) covering the room interior.
-/// Only ONE VideoPlayer in the whole scene plays at a time -- entering a new
-/// room's trigger stops the previously playing one before starting this one.
-/// </summary>
 [RequireComponent(typeof(BoxCollider))]
 public class RoomVideoTrigger : MonoBehaviour
 {
-    [Tooltip("VideoPlayer to control. If left blank, auto-finds one nearby.")]
     public VideoPlayer videoPlayer;
-
-    [Tooltip("Tag of the object that activates the video.")]
     public string triggerTag = "Player";
+    public int roomNumber;
+
+    [SerializeField] Transform tttsWaypoint;
+
+    public static VideoPlayer ActivePlayer => s_active;
+    public static int ActiveRoom => s_activeRoom;
 
     static VideoPlayer s_active;
+    static int s_activeRoom;
 
     void Reset()
     {
@@ -39,7 +38,11 @@ public class RoomVideoTrigger : MonoBehaviour
 
     void OnDisable()
     {
-        if (s_active == videoPlayer) s_active = null;
+        if (s_active == videoPlayer)
+        {
+            s_active = null;
+            s_activeRoom = 0;
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -48,10 +51,21 @@ public class RoomVideoTrigger : MonoBehaviour
         if (!other.CompareTag(triggerTag)) return;
 
         if (s_active != null && s_active != videoPlayer)
-            s_active.Stop();
+        {
+            bool prevComplete = RoomManager.Instance != null &&
+                RoomManager.Instance.roomCompleted[s_activeRoom];
+            if (!prevComplete) s_active.Stop();
+        }
 
-        videoPlayer.Play();
+        bool thisComplete = RoomManager.Instance != null &&
+            RoomManager.Instance.roomCompleted[roomNumber];
+        if (!thisComplete) videoPlayer.Play();
+
         s_active = videoPlayer;
+        s_activeRoom = roomNumber;
+
+        if (RoomManager.Instance != null)
+            RoomManager.Instance.PlayerEnteredRoom(roomNumber, videoPlayer, tttsWaypoint);
     }
 
     void OnTriggerExit(Collider other)
@@ -59,7 +73,17 @@ public class RoomVideoTrigger : MonoBehaviour
         if (videoPlayer == null) return;
         if (!other.CompareTag(triggerTag)) return;
 
-        videoPlayer.Stop();
-        if (s_active == videoPlayer) s_active = null;
+        bool complete = RoomManager.Instance != null &&
+            RoomManager.Instance.roomCompleted[roomNumber];
+        if (!complete) videoPlayer.Stop();
+
+        if (s_active == videoPlayer)
+        {
+            s_active = null;
+            s_activeRoom = 0;
+        }
+
+        if (RoomManager.Instance != null)
+            RoomManager.Instance.PlayerExitedRoom();
     }
 }
