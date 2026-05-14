@@ -2,11 +2,11 @@
 
 ## Game Overview
 
-A first-person horror/comedy game where the player explores a dark map and gets jumpscared by capybaras. The contrast between the cute animal and the horror setting is the core design hook.
+A first-person horror/comedy game where the player has been tasked with reconning a secret underground facility. John Pork has sent you on a mission to gather intel, and report back. But be careful Tung Tung Tung Sahur is patroling the facility and if he catches you John Pork will be at risk. Manuever from room to room, while avoiding being seen to win, get caught and you have to start over.
 
 **Engine:** Unity  
 **Genre:** First-person horror / jumpscare  
-**Theme:** Capybara
+**Theme:** Brainrot
 
 ---
 
@@ -38,7 +38,7 @@ A first-person horror/comedy game where the player explores a dark map and gets 
 - Jumpscare animation — sudden scale/position pop toward the camera
 
 ### Enemies / Moving Obstacles
-- Capybara AI that patrols a set path using `NavMeshAgent`
+- Tung Tung Tung Suhur AI that patrols a set path using `NavMeshAgent`
 - Trigger zone (collider) that activates the jumpscare when the player gets close
 
 ### Menus
@@ -57,17 +57,17 @@ Assets/
 ├── Scripts/
 │   ├── PlayerController.cs
 │   ├── MouseLook.cs
-│   ├── CapybaraAI.cs
+│   ├── TTTSAI.cs
 │   ├── JumpscareController.cs
 │   ├── UIManager.cs
 │   └── AudioManager.cs
 ├── Prefabs/
-│   ├── Capybara.prefab
+│   ├── TTTS.prefab
 │   └── Player.prefab
 ├── Audio/
 │   ├── ambience.wav
 │   ├── jumpscare.wav
-│   └── capybara_sound.wav
+│   └── death_sound.wav
 └── Materials/
 ```
 
@@ -105,9 +105,7 @@ Assets/
 4. **Wrap-up** — Briefly mention design decisions (lighting, tension-building audio) (30 sec)
 
 ---
-
 ## Design Notes
 
-- The jumpscare works best with a tension build-up before it — use flickering lights, quiet capybara sounds in the distance, or slow footstep audio to create dread before the scare triggers.
-- Keep the map small and navigable. A single floor with a few rooms is enough — complexity comes from lighting and sound, not map size.
-- The comedic/horror contrast (cute capybara = scary) is a deliberate design choice worth mentioning in the presentation.
+- Push creative deisgn, through funny videos, popular characters, and use audio, and lighting elements to build suspense
+  
