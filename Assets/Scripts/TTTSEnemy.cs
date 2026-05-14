@@ -11,6 +11,12 @@ public class TTTSEnemy : MonoBehaviour
     [SerializeField] float batSwingAngle = 50f;
 
     bool _isChasing = false;
+    Animator _animator;
+
+    void Start()
+    {
+        _animator = GetComponent<Animator>();
+    }
 
     void Update()
     {
@@ -37,16 +43,18 @@ public class TTTSEnemy : MonoBehaviour
 
         int currentRoom = RoomManager.Instance.currentRoom;
 
-        // player is in a room watching — don't chase
         if (currentRoom != 0)
         {
             _isChasing = false;
-            return;
+        }
+        else
+        {
+            _isChasing = RoomManager.Instance.lastEnteredRoom > 0 &&
+                         !RoomManager.Instance.roomCompleted[RoomManager.Instance.lastEnteredRoom];
         }
 
-        // player is in hallway — chase if they left a room early
-        _isChasing = RoomManager.Instance.lastEnteredRoom > 0 &&
-                     !RoomManager.Instance.roomCompleted[RoomManager.Instance.lastEnteredRoom];
+        if (_animator != null)
+            _animator.SetBool("isChasing", _isChasing);
     }
 
     void MoveToTarget()
@@ -54,7 +62,6 @@ public class TTTSEnemy : MonoBehaviour
         Transform waypoint = RoomManager.Instance?.currentWaypoint;
         if (waypoint == null) return;
 
-        // chase player directly if chasing, otherwise walk to waypoint
         Vector3 target = _isChasing ? player.position : waypoint.position;
         float speed = _isChasing ? chaseSpeed : 2f;
 
